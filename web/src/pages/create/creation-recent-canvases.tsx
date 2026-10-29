@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { App } from "antd";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Clock3, LoaderCircle, PanelsTopLeft, Plus } from "lucide-react";
+import { ChevronRight, Clock3, LoaderCircle, PanelsTopLeft, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 
 import { ProjectPreview } from "@/components/canvas/canvas-project-card";
@@ -75,7 +75,7 @@ export function CreationRecentCanvases({ onRequireLogin }: { onRequireLogin: () 
                 </h2>
                 <Link to="/canvas" className="creation-section-link">
                     查看全部
-                    <ArrowUpRight aria-hidden="true" />
+                    <ChevronRight aria-hidden="true" />
                 </Link>
             </header>
             <div className="creation-canvas-strip creation-scrollbar" role="list" aria-label="最近更新的画布" aria-busy={loading}>

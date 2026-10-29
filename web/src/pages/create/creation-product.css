@@ -13,7 +13,7 @@
 .creation-section-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
 .creation-section-heading h2 { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--user-ink); font-size: var(--fs-body); font-weight: 600; }
 .creation-section-heading h2 svg { width: var(--user-icon-size); height: var(--user-icon-size); color: var(--user-ink-muted); }
-.creation-section-link { display: inline-flex; height: var(--user-control-height-sm); align-items: center; gap: var(--space-1); border-radius: var(--user-radius-button-sm); padding: 0 var(--space-2); color: var(--user-ink-muted); font-size: var(--fs-caption); font-weight: var(--user-button-font-weight); transition: background var(--user-motion), color var(--user-motion); }
+.creation-section-link { display: inline-flex; height: var(--user-control-height-sm); align-items: center; gap: var(--space-1); border-radius: var(--user-radius-button-xl); padding: 0 var(--space-2); color: var(--user-ink-muted); font-size: var(--fs-caption); font-weight: var(--user-button-font-weight); transition: background var(--user-motion), color var(--user-motion); }
 .creation-section-link:hover { background: var(--user-surface-muted); color: var(--user-ink); }
 .creation-section-link svg { width: 14px; height: 14px; }
 .creation-canvas-strip { display: flex; gap: var(--space-3); overflow-x: auto; padding: var(--space-1) var(--space-1) var(--space-2); margin-inline: calc(-1 * var(--space-1)); scroll-snap-type: x proximity; }

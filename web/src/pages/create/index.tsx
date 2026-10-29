@@ -1284,8 +1284,8 @@ export default function CreatePage() {
                 </AnimatePresence>
                 <main ref={threadScrollRef} onScroll={handleThreadScroll} className="creation-home-scroll creation-scrollbar">
                 <section ref={launchpadRef} className="creation-launchpad" aria-label="开始创作">
-                    <header className="creation-start-heading">
-                        <h1>今天，你想创作什么</h1>
+                    <header className="creation-start-heading mt-12 pb-6">
+                        <span className="creation-start-heading-text text-3xl font-bold">今天，你想创作什么</span>
                     </header>
                     <div className={cn("creation-composer-stage is-home-mode", agentMode && "is-agent-mode")}>
                         {agentMode ? <div className="creation-agent-mode-shell">

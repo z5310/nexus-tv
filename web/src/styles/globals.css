@@ -19258,6 +19258,7 @@ html:not(.dark) .creation-home .creation-user-message-copy-wrap { box-shadow: 0 
     --user-control-height-sm: 28px;
     --user-radius-button: 8px;
     --user-radius-button-sm: 8px;
+    --user-radius-button-xl: 24px;
     --user-button-font-size: var(--button-font-size);
     --user-button-font-weight: var(--button-font-weight);
     --user-button-icon-size: var(--button-icon-size);
