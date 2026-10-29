@@ -12349,6 +12349,32 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-card-remove:focus-visible { opacity: 1; }
 .creation-home .creation-reference-card-remove:hover { background: var(--status-error); }
 .creation-home .creation-reference-card-remove svg { width: var(--space-3); height: var(--space-3); }
+.creation-home .creation-upload-progress-card {
+    position: relative;
+    display: flex;
+    width: 52px;
+    height: 69px;
+    flex: 0 0 52px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    overflow: hidden;
+    border: var(--stroke-1) solid var(--creation-border);
+    border-radius: var(--r-sm);
+    background: var(--creation-surface-muted);
+    color: var(--creation-muted);
+    list-style: none;
+    padding: var(--space-1);
+}
+.creation-home .creation-upload-progress-card.is-error { color: var(--status-error); }
+.creation-home .creation-upload-progress-icon { display: grid; place-items: center; }
+.creation-home .creation-upload-progress-icon svg { width: var(--space-4); height: var(--space-4); }
+.creation-home .creation-upload-progress-copy { display: grid; width: 100%; gap: 1px; text-align: center; }
+.creation-home .creation-upload-progress-copy strong { overflow: hidden; font-size: 9px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.creation-home .creation-upload-progress-copy > span { font-size: 9px; }
+.creation-home .creation-upload-progress-track { position: absolute; right: var(--space-1); bottom: var(--space-1); left: var(--space-1); height: 2px; overflow: hidden; border-radius: var(--r-full); background: var(--creation-border); }
+.creation-home .creation-upload-progress-track i { display: block; height: 100%; border-radius: inherit; background: var(--control-accent); transition: width 180ms ease; }
 .creation-home .creation-reference-add-slot { display: flex; flex: 0 0 auto; list-style: none; }
 .creation-home .creation-reference-add-button { display: flex; width: 58px; height: 77px; flex: 0 0 58px; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); border: var(--stroke-1) dashed var(--creation-border); border-radius: var(--r-sm); background: transparent; color: var(--creation-muted); padding: 0; transition: border-color var(--motion-dur-fast-calc) ease, background-color var(--motion-dur-fast-calc) ease, color var(--motion-dur-fast-calc) ease, width var(--motion-state) var(--motion-ease-out), height var(--motion-state) var(--motion-ease-out); }
 .creation-home .creation-reference-track:not(.is-expanded) .creation-reference-add-slot { margin-left: var(--space-2); }
@@ -12370,6 +12396,18 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-add-button:disabled { cursor: wait; opacity: .5; }
 .creation-home .creation-reference-add-button svg { width: var(--space-5); height: var(--space-5); }
 .creation-home .creation-reference-add-button span { font-size: 11px; line-height: 1; }
+.creation-reference-source-popover .ant-popover-inner { padding: 0; }
+.creation-reference-source-content { padding: 0; }
+.creation-reference-source-menu { display: grid; width: 274px; gap: 2px; padding: 8px 12px 12px; }
+.creation-reference-source-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 8px; color: var(--user-ink-soft); font-size: 12px; }
+.creation-reference-source-head strong { font-weight: 400; }
+.creation-reference-source-head span { font-variant-numeric: tabular-nums; }
+.creation-reference-source-menu button { display: grid; width: 100%; min-height: 40px; grid-template-columns: 20px minmax(0, 1fr); align-items: center; gap: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--user-ink); padding: 0 8px; font: inherit; font-size: 13px; text-align: left; transition: background var(--user-motion), opacity var(--user-motion); }
+.creation-reference-source-menu button:hover:not(:disabled),
+.creation-reference-source-menu button:focus-visible { background: var(--creation-surface-hover); }
+.creation-reference-source-menu button:focus-visible { outline: var(--stroke-2) solid var(--control-focus-ring); outline-offset: -2px; }
+.creation-reference-source-menu button:disabled { cursor: not-allowed; opacity: .45; }
+.creation-reference-source-menu button svg { width: 17px; height: 17px; stroke-width: 1.8; color: var(--user-ink); }
 .creation-home .creation-reference-filter-empty { display: flex; min-height: 69px; align-items: center; list-style: none; color: var(--creation-muted); padding: 0 var(--space-3); font-size: var(--fs-caption); white-space: nowrap; }
 .creation-home .creation-reference-panel-expand { display: grid; width: var(--space-8); height: var(--space-8); flex: 0 0 var(--space-8); place-items: center; align-self: center; border: var(--stroke-1) solid var(--creation-border); border-radius: var(--r-md); background: var(--creation-surface-muted); color: var(--creation-muted); padding: 0; transition: background-color var(--motion-dur-fast-calc) ease, color var(--motion-dur-fast-calc) ease, transform var(--motion-dur-fast-calc) var(--motion-ease-out); }
 .creation-home .creation-reference-panel-expand:hover { background: var(--creation-surface-hover); color: var(--creation-text);}
@@ -12382,6 +12420,11 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-track-button svg { width: var(--space-4); height: var(--space-4); }
 html:not(.dark) .creation-home .creation-reference-track-button { border-color: rgba(28, 32, 37, .12); background: rgba(255, 255, 255, .9); color: #272c32; box-shadow: var(--elevation-overlay); }
 html:not(.dark) .creation-home .creation-reference-add-button:hover:not(:disabled) { background: rgba(28, 32, 37, .055); }
+
+.creation-media-preview-modal .creation-audio-preview { display: grid; min-height: 220px; place-items: center; gap: var(--space-6); padding: var(--space-8); }
+.creation-media-preview-modal .creation-audio-preview > svg { width: 48px; height: 48px; color: var(--creation-muted); }
+.creation-media-preview-modal .creation-audio-preview audio { width: min(640px, 90vw); }
+.creation-media-preview-modal .creation-file-preview { display: block; width: 100%; height: min(78vh, 820px); border: 0; border-radius: var(--r-sm); background: var(--color-neutral-0); }
 
 @media (max-width: 680px) {
     .creation-home .creation-reference-panel { margin-bottom: var(--space-2); }
@@ -12488,6 +12531,140 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
 /* 上传 input 为 hidden，编辑器是该网格的唯一可见子项；创作页输入区保持整行宽度。 */
 .creation-home .creation-chat-composer.is-empty .creation-chat-writing-surface,
 .creation-home .creation-chat-composer.is-thread .creation-chat-writing-surface { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.creation-home .creation-chat-editor {
+    display: grid;
+    grid-template-columns: fit-content(min(42%, 360px)) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+}
+.creation-home .creation-chat-mention-container {
+    grid-column: 2;
+    grid-row: 1;
+}
+.creation-home .creation-reference-panel,
+.creation-home .creation-reference-panel.is-expanded {
+    grid-column: 1;
+    grid-row: 1;
+    width: fit-content;
+    max-width: min(42vw, 360px);
+    margin: 0;
+    z-index: 2;
+}
+.creation-home .creation-reference-track-wrapper,
+.creation-home .creation-reference-stack-shell { max-width: inherit; }
+.creation-home .creation-reference-panel.is-expanded .creation-reference-stack-shell { width: fit-content; max-width: inherit; }
+.creation-home .creation-reference-track.is-empty .creation-reference-add-button,
+.creation-home .creation-reference-track.is-expanded .creation-reference-add-button {
+    width: 66px;
+    height: 88px;
+    flex: 0 0 66px;
+    border-style: solid;
+    border-radius: 9px;
+    background: var(--creation-surface-muted);
+    transform: rotate(-6deg);
+    box-shadow: none;
+}
+.creation-home .creation-reference-track.is-expanded { gap: 0; }
+.creation-home .creation-reference-track.is-expanded .creation-reference-stack-card {
+    width: 66px;
+    height: 88px;
+    flex-basis: 66px;
+}
+.creation-home .creation-reference-track.is-expanded .creation-reference-stack-card:nth-child(3n + 1) .creation-reference-card-content { transform: rotate(-5deg); }
+.creation-home .creation-reference-track.is-expanded .creation-reference-stack-card:nth-child(3n + 2) .creation-reference-card-content { transform: rotate(3deg); }
+.creation-home .creation-reference-track.is-expanded .creation-reference-stack-card:nth-child(3n) .creation-reference-card-content { transform: rotate(-2deg); }
+.creation-home .creation-reference-track.is-expanded .creation-reference-stack-card + .creation-reference-stack-card { margin-left: -10px; }
+.creation-home .creation-reference-track.is-expanded .creation-reference-add-slot { margin-left: 10px; }
+.creation-home .creation-reference-track.is-empty .creation-reference-add-button {
+    flex-direction: column;
+    justify-content: center;
+    margin: 5px 4px 10px;
+    padding: 0;
+}
+.creation-home .creation-reference-add-button > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.creation-home .creation-reference-add-button:hover:not(:disabled) { transform: rotate(-3deg) translateY(-2px); }
+.creation-reference-source-popover { z-index: var(--z-toast) !important; }
+
+/* 有参考素材时，默认收成一叠；悬浮整组后在文字上方横向展开，不触发布局重排。 */
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) {
+    position: relative;
+    width: 84px;
+    min-width: 84px;
+    height: 96px;
+    overflow: visible;
+    z-index: 4;
+}
+.creation-home .creation-chat-editor,
+.creation-home .creation-reference-panel,
+.creation-home .creation-reference-track-wrapper,
+.creation-home .creation-reference-stack-shell,
+.creation-home .creation-reference-add-slot { overflow: visible !important; }
+.creation-home .creation-reference-track { min-height: 104px; overflow: visible !important; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-track-wrapper,
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-stack-shell {
+    width: 84px;
+    height: 96px;
+    overflow: visible;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: max-content;
+    max-width: none;
+    height: 96px;
+    overflow: visible;
+    padding: 5px 4px;
+    transition: filter var(--motion-state) var(--motion-ease-out);
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card {
+    margin-left: -54px;
+    pointer-events: none;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:first-child {
+    margin-left: 0;
+    pointer-events: auto;
+    z-index: 4;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(2) { z-index: 3; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(3) { z-index: 2; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(n + 4) { z-index: 1; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-slot {
+    position: absolute;
+    top: 51px;
+    left: 54px;
+    z-index: 6;
+    margin: 0;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    flex-basis: 36px;
+    border-radius: var(--r-full);
+    background: var(--creation-surface-raised, var(--creation-surface-muted));
+    transform: none;
+    box-shadow: var(--elevation-overlay);
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button:hover:not(:disabled) { transform: scale(1.04); }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover { z-index: var(--z-popover); }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-track {
+    gap: 8px;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card {
+    margin-left: 0;
+    pointer-events: auto;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-add-slot { margin-left: 2px; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-add-button {
+    width: 66px;
+    height: 88px;
+    flex-basis: 66px;
+    border-radius: 9px;
+}
 .creation-home .creation-chat-editor textarea,
 .creation-home .creation-chat-composer.is-thread .creation-chat-editor textarea,
     .creation-home .creation-chat-mention-container { min-height: 60px; }
@@ -12612,10 +12789,19 @@ html:not(.dark) .creation-user-message-reference { background: rgba(28, 32, 37, 
 .creation-media-preview-modal .ant-modal-close { color: #fff; }
 .creation-media-preview-video { display: block; width: 100%; max-height: 82vh; margin: 0 auto; object-fit: contain; }
 .creation-media-preview-video { width: 100%; background: #050505; }
+.creation-media-preview-modal.is-visual { top: 0; max-width: none; height: 100vh; margin: 0; padding: 0; }
+.creation-media-preview-modal.is-visual .ant-modal-container { display: grid; width: 100vw; height: 100vh; place-items: center; overflow: visible; border-radius: 0; background: transparent !important; box-shadow: none !important; }
+.creation-media-preview-modal.is-visual .ant-modal-body { width: 100%; height: 100%; }
+.creation-media-preview-modal.is-visual .ant-modal-close { position: fixed; top: 20px; right: 20px; display: grid; width: 38px; height: 38px; place-items: center; border-radius: var(--r-full); background: color-mix(in srgb, var(--color-neutral-950) 72%, transparent); color: var(--color-neutral-0); }
+.creation-media-preview-stage { display: grid; width: 100vw; height: 100vh; place-items: center; padding: 56px; }
+.creation-media-preview-stage img,
+.creation-media-preview-stage video { display: block; max-width: 100%; max-height: 100%; border: 0; border-radius: 0; background: transparent; box-shadow: none; object-fit: contain; }
+.creation-media-preview-stage video { width: auto; height: auto; }
 
 html:not(.dark) .creation-user-message { background: rgba(28, 32, 37, .07); }
 html:not(.dark) .creation-video-result,
 html:not(.dark) .creation-media-preview-modal .ant-modal-container { background: #1f2227; }
+html:not(.dark) .creation-media-preview-modal.is-visual .ant-modal-container { background: transparent !important; }
 
 @media (max-width: 800px) {
     .creation-home .creation-chat-writing-surface,
@@ -19294,12 +19480,24 @@ html:not(.dark) .creation-home .creation-user-message-copy-wrap { box-shadow: 0 
 .app-user-workspace .creation-composer-shell {
     width: 100%;
     overflow: hidden;
+    border: 1px solid var(--user-border);
     border-radius: 16px;
     background: transparent;
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--user-ink) 8%, transparent);
+    box-shadow: none;
+    transition: border-color var(--user-motion), box-shadow var(--user-motion);
+}
+.app-user-workspace .creation-composer-shell:hover,
+.app-user-workspace .creation-composer-shell:focus-within {
+    border-color: var(--user-border-strong);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--user-ink) 10%, transparent);
 }
 .dark .app-user-workspace .creation-composer-shell {
-    box-shadow: 0 1px 2px color-mix(in srgb, rgba(0, 0, 0, .28) 50%, transparent), 0 6px 16px rgba(0, 0, 0, .28);
+    box-shadow: none;
+}
+.dark .app-user-workspace .creation-composer-shell:hover,
+.dark .app-user-workspace .creation-composer-shell:focus-within {
+    border-color: rgba(255, 255, 255, .16);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .28);
 }
 .app-user-workspace .creation-chat-composer {
     position: relative;

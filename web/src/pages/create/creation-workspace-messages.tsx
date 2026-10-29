@@ -26,7 +26,6 @@ import { creationResultAssetIds, creationResultStorageKeys } from "@/lib/canvas/
 import { resolveMediaUrl } from "@/services/file-storage";
 import { resolveImageUrl } from "@/services/image-storage";
 import { Button } from "antd";
-import { CanvasImagePreview } from "@/components/canvas/canvas-image-preview";
 import { AppModal } from "@/components/ui/product/app-modal";
 import { creationResultEntries } from "./creation-result-urls";
 
@@ -685,20 +684,27 @@ export function CreationMessageReferences({ references }: { references: Creation
     );
 }
 
-export function CreationMediaPreviewModal({ url, type, onClose }: { url: string; type: "image" | "video"; onClose: () => void }) {
-    if (type === "image") return <CanvasImagePreview src={url} alt="媒体预览" onClose={onClose} />;
+export function CreationMediaPreviewModal({ url, type, onClose }: { url: string; type: "image" | "video" | "audio" | "file"; onClose: () => void }) {
+    if (type === "image" || type === "video") return (
+        <AppModal flush open={Boolean(url)} title={null} footer={null} centered destroyOnHidden width="100vw" onCancel={onClose} className="creation-media-preview-modal is-visual" maskClosable>
+            <div className="creation-media-preview-stage">
+                {type === "image" ? <img src={url} alt="" draggable={false} /> : <video controls autoPlay playsInline src={url} />}
+            </div>
+        </AppModal>
+    );
 
     return (
         <AppModal flush open={Boolean(url)} title={null} footer={null} centered destroyOnHidden width="min(1160px, calc(100vw - 32px))" onCancel={onClose} className="creation-media-preview-modal">
-            {url ? <video controls autoPlay className="creation-media-preview-video" src={url} /> : null}
+            {url && type === "audio" ? <div className="creation-audio-preview"><Music2 /><audio controls autoPlay src={url} /></div> : null}
+            {url && type === "file" ? <iframe className="creation-file-preview" src={url} title="文件预览" /> : null}
         </AppModal>
     );
 }
 
-export function CreationAttachmentThumbnail({ item, onPreview, onRemove }: { item: CreationAttachment; onPreview: (type: "image" | "video", url: string) => void; onRemove: (id: string) => void }) {
+export function CreationAttachmentThumbnail({ item, onPreview, onRemove }: { item: CreationAttachment; onPreview: (type: "image" | "video" | "audio" | "file", url: string) => void; onRemove: (id: string) => void }) {
     const kind = creationAttachmentKind(item);
-    const previewable = kind === "image" || kind === "video";
-    const url = (kind === "video" ? item.url : item.previewUrl) || "";
+    const previewable = Boolean(item.url || item.previewUrl);
+    const url = (kind === "image" ? item.previewUrl : item.url || item.previewUrl) || "";
     const imageUrl = kind === "image" ? resolveResourceUrl(item.storageKey, item.previewUrl) : "";
     const previewUrl = kind === "image" ? imageUrl : url;
     const content =
@@ -726,11 +732,8 @@ export function CreationAttachmentThumbnail({ item, onPreview, onRemove }: { ite
     return (
         <div className="creation-reference-card-content">
             {previewable ? (
-                <button type="button" className="creation-reference-card-preview" onClick={() => onPreview(kind === "video" ? "video" : "image", previewUrl)} aria-label={`放大预览 ${item.name}`} disabled={!previewUrl}>
+                <button type="button" className="creation-reference-card-preview" onClick={() => onPreview(kind, previewUrl)} aria-label={`预览 ${item.name}`} disabled={!previewUrl}>
                     {content}
-                    <span aria-hidden="true">
-                        <Maximize2 />
-                    </span>
                 </button>
             ) : (
                 <div className="creation-reference-card-preview is-file" aria-label={item.name}>

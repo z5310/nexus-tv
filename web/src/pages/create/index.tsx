@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { App, Spin } from "antd";
 import { Tooltip } from "@/components/ui/base/tooltip";
-import { History, Maximize2, PenLine } from "lucide-react";
+import { History, Maximize2, PenLine, Sparkles } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router";
 
@@ -22,7 +22,6 @@ import { resolveModelChannel, resolveModelRequestConfig, selectableModelsByCapab
 import { useCreationPreferencesStore } from "@/stores/use-creation-preferences-store";
 import { useAssetStore, type Asset } from "@/stores/use-asset-store";
 import { loadAssetsForUse, saveRemoteUserDataNow } from "@/services/user-data-sync";
-import { useAppearanceStore } from "@/stores/use-appearance-store";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/stores/use-user-store";
 import type { PromptOptimizerProvider } from "@/lib/plugins/plugin-types";
@@ -34,7 +33,7 @@ import { creationAttachmentFromAudio, creationAttachmentFromDocument, creationAt
 import { creationLibraryDisabledReason, creationLibrarySelectionToAttachments } from "./creation-library";
 import { defaultCreationMode, modeLabels, type CreationConversation, type CreationMessage, type CreationMode, type CreationRetryContext, type CreationSettings, type CreationShotRailEntry, type CreationStatus } from "./creation-types";
 import { attachCreationTaskContexts, completedCreationGenerationTask, conversationTimestamp, creationMessageNeedsResultSync, creationShotRail, creationVideoShotOrdinal, isImageAttachment, isVideoAttachment, materializeCreationTaskResults, newConversation, newMessage, reconcileCreationTaskMessages, type PersistedCreationTask } from "./creation-conversations";
-import { CreationComposer, CreationEmptySuggest, CreationHistoryDrawer, CreationMessageView, CreationModeTabs, CreationWorkspaceToolbar, creationAssetCategoryLabels } from "./creation-workspace";
+import { CreationComposer, CreationHistoryDrawer, CreationMessageView, CreationModeDropdown, CreationWorkspaceToolbar, creationAssetCategoryLabels } from "./creation-workspace";
 import { declaredInspirationSources } from "@/lib/inspirations/catalog";
 import { fillablePrompt } from "@/lib/inspirations/resolve";
 import { CreationRecentCanvases } from "./creation-recent-canvases";
@@ -73,7 +72,6 @@ export default function CreatePage() {
     const navigate = useNavigate();
     const [openingCanvas, setOpeningCanvas] = useState(false);
     const openingCanvasRef = useRef(false);
-    const brandName = useAppearanceStore((state) => state.appearance.brandName);
     const config = useEffectiveConfig();
     const composerPreferencesHydrated = useCreationPreferencesStore((state) => state.hydrated);
     const rememberMode = useCreationPreferencesStore((state) => state.rememberMode);
@@ -101,6 +99,7 @@ export default function CreatePage() {
     const [mode, setMode] = useState<CreationMode>(() => initialComposerPreferences.mode || defaultCreationMode);
     const [prompt, setPrompt] = useState("");
     const [attachments, setAttachments] = useState<CreationAttachment[]>([]);
+    const [uploadItems, setUploadItems] = useState<Array<{ id: string; name: string; progress: number; status: "uploading" | "error" }>>([]);
     const promptRef = useRef(prompt);
     const attachmentsRef = useRef(attachments);
     const [draftReferences, setDraftReferences] = useState<CreationReference[]>([]);
@@ -583,6 +582,44 @@ export default function CreatePage() {
             asset: creationImageAsset({ title: file.name, uploaded, metadata: { source: "create-upload", fileName: file.name } }),
             attachment: creationAttachmentFromImage(file, uploaded),
         };
+    };
+    const uploadLocalReferences = async (files: File[]) => {
+        const supported = files.filter((file) => creationFileAccepted("text", file));
+        if (supported.length < files.length) toast.warning(`${files.length - supported.length} 个文件格式暂不支持`);
+        const remaining = Math.max(0, maxReferences - attachmentsRef.current.length);
+        const accepted = supported.slice(0, remaining);
+        if (supported.length > remaining) toast.warning(`当前最多可添加 ${maxReferences} 个参考文件`);
+        if (!accepted.length) return;
+
+        await Promise.all(accepted.map(async (file, index) => {
+            const id = `upload:${Date.now()}:${index}:${file.name}`;
+            setUploadItems((current) => [...current, { id, name: file.name, progress: 8, status: "uploading" }]);
+            const timer = window.setInterval(() => {
+                setUploadItems((current) => current.map((item) => item.id === id && item.status === "uploading"
+                    ? { ...item, progress: Math.min(88, item.progress + 7) }
+                    : item));
+            }, 220);
+            try {
+                const { asset, attachment } = await uploadCreationAsset(file);
+                if (asset) addAsset(asset);
+                setAttachments((current) => {
+                    const candidates = [...current, attachment];
+                    const reconciled = mode === "video" && videoReferenceLimits
+                        ? reconcileCreationAttachmentLimits(candidates, [], videoReferenceLimits)
+                        : reconcileCreationAttachmentLimit(candidates, [], maxReferences);
+                    attachmentsRef.current = reconciled.attachments;
+                    return reconciled.attachments;
+                });
+                setUploadItems((current) => current.map((item) => item.id === id ? { ...item, progress: 100 } : item));
+                window.setTimeout(() => setUploadItems((current) => current.filter((item) => item.id !== id)), 420);
+            } catch (error) {
+                setUploadItems((current) => current.map((item) => item.id === id ? { ...item, status: "error", progress: 100 } : item));
+                toast.error(`${file.name} 上传失败：${error instanceof Error ? error.message : "请重试"}`);
+                window.setTimeout(() => setUploadItems((current) => current.filter((item) => item.id !== id)), 2400);
+            } finally {
+                window.clearInterval(timer);
+            }
+        }));
     };
     const uploadLibraryAssets = async (files: FileList | File[]) => {
         const next = Array.from(files).filter((file) => creationFileAccepted(mode, file));
@@ -1192,7 +1229,10 @@ export default function CreatePage() {
         onReorderAttachments: reorderAttachments,
         onReplaceAttachment: replaceReferenceFromTrack,
         onReplaceReferenceFiles: replaceReferenceFromFiles,
+        onUploadFiles: uploadLocalReferences,
         onOpenLibrary: () => setLibraryOpen(true),
+        uploadItems,
+        uploadAccept: creationUploadAccept("text"),
         onModeChange: selectMode,
         model: selectedModel,
         modelRequirements,
@@ -1245,20 +1285,14 @@ export default function CreatePage() {
                 <main ref={threadScrollRef} onScroll={handleThreadScroll} className="creation-home-scroll creation-scrollbar">
                 <section ref={launchpadRef} className="creation-launchpad" aria-label="开始创作">
                     <header className="creation-start-heading">
-                        <div>
-                            <h1>和{brandName}聊聊创作想法</h1>
-                            <p>从一个画面、一个角色或一句话开始。</p>
-                        </div>
-                        <button type="button" className="creation-history-entry" aria-label="查看历史对话" aria-expanded={historyOpen} onClick={() => setHistoryOpen(true)}><History aria-hidden="true" /><span>历史对话</span></button>
+                        <h1>今天，你想创作什么</h1>
                     </header>
                     <div className={cn("creation-composer-stage is-home-mode", agentMode && "is-agent-mode")}>
-                        <CreationModeTabs mode={mode} agentActive={agentMode} onAgentSelect={() => setAgentMode(true)} onModeChange={(next) => { setAgentMode(false); selectMode(next); }} />
-                        {agentMode ? <CreationAgentEntry /> : <div className="creation-empty-composer"><CreationComposer {...composerProps} variant="empty" /></div>}
+                        {agentMode ? <div className="creation-agent-mode-shell">
+                            <CreationModeDropdown mode={mode} agentActive onAgentSelect={() => setAgentMode(true)} onModeChange={(next) => { setAgentMode(false); selectMode(next); }} />
+                            <CreationAgentEntry />
+                        </div> : <div className="creation-empty-composer"><CreationComposer {...composerProps} variant="empty" modeSelector={<CreationModeDropdown mode={mode} onAgentSelect={() => setAgentMode(true)} onModeChange={(next) => { setAgentMode(false); selectMode(next); }} />} /></div>}
                     </div>
-                    <CreationEmptySuggest
-                        onStartPrompt={startPrompt}
-                        onOpenLibrary={() => { setAgentMode(false); selectMode("image"); setLibraryOpen(true); }}
-                    />
                 </section>
                 <CreationRecentCanvases onRequireLogin={() => setLoginDialogOpen(true)} />
                 <Suspense fallback={<div className="creation-hall-loading" role="status">正在准备灵感大厅…</div>}>
@@ -1313,7 +1347,7 @@ export default function CreatePage() {
             categoryLabels={{ ...creationAssetCategoryLabels, ...externalAssetSources.categoryLabels }}
             folders={externalAssetSources.folders}
             initialSelectedIds={attachments.flatMap((item) => item.id.startsWith("asset:") ? [item.id.slice(6)] : item.id.startsWith("external:") ? [item.id] : [])}
-            upload={{ accept: creationUploadAccept(mode), description: mode === "text" ? "支持图片、视频、音频和常用文档；媒体会保存到素材库" : `支持图片${mode === "video" ? "、视频和音频" : ""}，上传后保存到素材库`, onUpload: uploadLibraryAssets, external: { accept: "image/*", description: "写入当前 Eagle 文件夹；Eagle 当前支持图片文件", onUpload: (files, folderId) => externalAssetSources.uploadExternalFiles(files, folderId) } }}
+            upload={{ accept: creationUploadAccept("text"), description: "支持图片、视频、音频和常用文档", onUpload: uploadLibraryAssets, external: { accept: "image/*", description: "写入当前 Eagle 文件夹；Eagle 当前支持图片文件", onUpload: (files, folderId) => externalAssetSources.uploadExternalFiles(files, folderId) } }}
             onClose={() => setLibraryOpen(false)}
             onConfirm={handleLibrarySelect}
         /></Suspense> : null}

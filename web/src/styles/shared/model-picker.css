@@ -385,6 +385,16 @@ html:not(.dark) .canvas-composer-model-picker[aria-expanded="true"] {
         background: rgba(15, 23, 42, 0.075) !important;
     }
 
+    html:not(.dark) .app-user-workspace .creation-launchpad .creation-model-picker.canvas-composer-model-picker {
+        border-radius: 12px !important;
+        background: transparent !important;
+    }
+
+    html:not(.dark) .app-user-workspace .creation-launchpad .creation-model-picker.canvas-composer-model-picker:hover,
+    html:not(.dark) .app-user-workspace .creation-launchpad .creation-model-picker.canvas-composer-model-picker[aria-expanded="true"] {
+        background: rgba(15, 23, 42, 0.075) !important;
+    }
+
     @container (min-width: 440px) {
 
         .canvas-composer-tools .canvas-composer-model-picker {
@@ -894,17 +904,20 @@ html:not(.dark) .creation-home .creation-chat-composer .creation-model-picker.ca
 }
 /* composer 里的模型选择与旁边的参数、参考内容是同一种 34px 浅底按钮（8px 圆角、无边、悬停不浮起）。 */
 .app-user-workspace .creation-chat-composer .creation-model-picker.canvas-composer-model-picker {
-    min-height: var(--button-height) !important;
-    border-radius: var(--button-radius) !important;
-    background: var(--button-tonal-bg) !important;
-    color: var(--button-ghost-fg) !important;
-    transition: background-color var(--button-motion), color var(--button-motion) !important;
+
+    min-height: 40px !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+    color: var(--user-ink-muted) !important;
+    box-shadow: none !important;
+    transition: background var(--user-motion), color var(--user-motion) !important;
 }
 .app-user-workspace .creation-chat-composer .creation-model-picker.canvas-composer-model-picker:hover,
 .app-user-workspace .creation-chat-composer .creation-model-picker.canvas-composer-model-picker[aria-expanded="true"] {
-    background: var(--button-tonal-hover-bg) !important;
-    color: var(--button-ghost-hover-fg) !important;
-    box-shadow: none;
+    background: var(--user-surface-hover) !important;
+    color: var(--user-ink) !important;
+    box-shadow: none !important;
+
 }
 .app-user-workspace .creation-launchpad .creation-model-picker.canvas-composer-model-picker {
     min-height: var(--button-height) !important;
