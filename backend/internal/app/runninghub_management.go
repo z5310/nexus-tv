@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -62,9 +64,9 @@ func (s *Service) FetchRunningHubAppInfo(ctx context.Context, req RunningHubWork
 	}
 	root := runningHubRootURL(config.BaseURL)
 	var response map[string]any
-	if err := s.runningHubJSON(ctx, config, root+"/api/webapp/apiCallDemo", map[string]any{
-		"apiKey":   runningHubAPIKey(config),
-		"webappId": webappID,
+	if err := s.runningHubGETJSON(ctx, config, root+"/api/webapp/apiCallDemo", url.Values{
+		"apiKey":   {runningHubAPIKey(config)},
+		"webappId": {webappID},
 	}, &response); err != nil {
 		return nil, fmt.Errorf("拉取 RunningHub App 参数失败：%w", err)
 	}
@@ -77,6 +79,30 @@ func (s *Service) FetchRunningHubAppInfo(ctx context.Context, req RunningHubWork
 		result["fields"] = normalizeManagementAppFields(rawData["nodeInfoList"], req.Capability)
 	}
 	return result, nil
+}
+
+func (s *Service) runningHubGETJSON(ctx context.Context, config providerConfig, endpoint string, query url.Values, target *map[string]any) error {
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+	values := parsed.Query()
+	for key, items := range query {
+		for _, item := range items {
+			values.Add(key, item)
+		}
+	}
+	parsed.RawQuery = values.Encode()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, parsed.String(), nil)
+	if err != nil {
+		return err
+	}
+	ApplyOutboundHeaders(req, config.Headers)
+	data, _, err := doBinary(req)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, target)
 }
 
 func normalizeManagementAppFields(raw any, capability string) []map[string]any {
