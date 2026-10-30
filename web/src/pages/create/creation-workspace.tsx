@@ -321,12 +321,11 @@ export function CreationComposer(props: ComposerProps) {
                                 >
                                     <CreationAttachmentThumbnail item={item} onPreview={previewAttachment} onRemove={props.onRemoveAttachment} />
                                 </Reorder.Item>)}
-                                {props.uploadItems.map((item) => <li key={item.id} className={`creation-upload-progress-card is-${item.status}`} aria-label={`${item.name} ${item.status === "error" ? "上传失败" : `上传 ${item.progress}%`}`}>
-                                    <span className="creation-upload-progress-icon">{item.status === "error" ? <X /> : <LoaderCircle className="animate-spin" />}</span>
-                                    <span className="creation-upload-progress-copy"><strong>{item.name}</strong><span>{item.status === "error" ? "上传失败" : `${item.progress}%`}</span></span>
-                                    <span className="creation-upload-progress-track"><i style={{ width: `${item.progress}%` }} /></span>
-                                </li>)}
-                                <li className="creation-reference-add-slot"><Popover
+                                {props.uploadItems.length ? <li className={`creation-upload-progress-card${props.uploadItems.some((item) => item.status === "error") ? " is-error" : ""}`} aria-label={props.uploadItems.some((item) => item.status === "error") ? "部分参考文件上传失败" : `正在上传 ${props.uploadItems.length} 个参考文件`}>
+                                    <span className="creation-upload-progress-stack" aria-hidden="true"><i /><i /><i /></span>
+                                    <span className="creation-upload-progress-icon">{props.uploadItems.some((item) => item.status === "error") ? <X /> : <LoaderCircle className="animate-spin" />}</span>
+                                </li> : null}
+                                <li className="creation-reference-add-slot">{visibleAttachments.length ? <button type="button" className="creation-reference-add-button" onClick={() => uploadInputRef.current?.click()} disabled={interactionBusy || !canAddMoreReferences} aria-label={addReferenceLabel}><Plus aria-hidden="true" /><span>添加参考</span></button> : <Popover
                                     open={referenceSourceOpen}
                                     onOpenChange={setReferenceSourceOpen}
                                     trigger={["hover", "click"]}
@@ -340,7 +339,7 @@ export function CreationComposer(props: ComposerProps) {
                                         <button type="button" onClick={() => { setReferenceSourceOpen(false); uploadInputRef.current?.click(); }} disabled={interactionBusy || !canAddMoreReferences}><Upload /><span>上传</span></button>
                                         <button type="button" onClick={() => { setReferenceSourceOpen(false); props.onOpenLibrary(); }} disabled={interactionBusy || !canAddMoreReferences}><Images /><span>从素材库添加</span></button>
                                     </div>}
-                                ><button type="button" className="creation-reference-add-button" onPointerEnter={() => setReferenceSourceOpen(true)} onClick={() => setReferenceSourceOpen(true)} disabled={interactionBusy || !canAddMoreReferences} aria-label={addReferenceLabel}><Plus aria-hidden="true" /><span>添加参考</span></button></Popover></li>
+                                ><button type="button" className="creation-reference-add-button" disabled={interactionBusy || !canAddMoreReferences} aria-label={addReferenceLabel}><Plus aria-hidden="true" /><span>添加参考</span></button></Popover>}</li>
                             </Reorder.Group>
                         </div>
                     </div>

@@ -12322,8 +12322,8 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    border: var(--stroke-1) solid var(--creation-border);
+    overflow: visible;
+    border: 1.5px solid rgba(255, 255, 255, .82);
     border-radius: var(--r-sm);
     background: var(--creation-surface-muted);
     transform: rotate(var(--stack-rotate, 0deg));
@@ -12333,7 +12333,7 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-track.is-expanded .creation-reference-card-content { z-index: auto; transform: rotate(0deg); }
 .creation-home .creation-reference-stack-card[data-framer-dragging="true"] { margin-left: 0; box-shadow: var(--elevation-overlay); z-index: var(--z-popover); }
 .creation-home .creation-reference-stack-card[data-framer-dragging="true"] .creation-reference-card-content { z-index: var(--z-popover); transform: rotate(0deg) scale(1.05); }
-.creation-home .creation-reference-card-preview { display: block; width: 100%; height: 100%; border: 0; background: transparent; padding: 0; cursor: zoom-in; }
+.creation-home .creation-reference-card-preview { display: block; width: 100%; height: 100%; overflow: hidden; border: 0; border-radius: inherit; background: transparent; padding: 0; cursor: zoom-in; }
 .creation-home .creation-reference-card-preview.is-file { cursor: default; }
 .creation-home .creation-reference-card-preview img,
 .creation-home .creation-reference-card-preview video { width: 100%; height: 100%; object-fit: cover; transition: transform var(--motion-dur-fast-calc) var(--motion-ease-out); }
@@ -12344,7 +12344,7 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-card-preview:focus-visible > span:not(.cached-resource-image-shell) { opacity: 1; }
 .creation-home .creation-reference-card-preview > .cached-resource-image-shell { position: static; display: grid; width: 100%; height: 100%; place-items: center; }
 .creation-home .creation-reference-card-preview:focus-visible { outline: var(--stroke-2) solid var(--control-focus-ring); outline-offset: calc(-1 * var(--stroke-2)); }
-.creation-home .creation-reference-card-remove { position: absolute; top: var(--space-1); right: var(--space-1); z-index: 1; display: grid; width: var(--space-5); height: var(--space-5); place-items: center; border: 0; border-radius: var(--r-xs); background: color-mix(in srgb, var(--color-neutral-950) 76%, transparent); color: var(--color-neutral-0); padding: 0; opacity: 0; transition: opacity var(--motion-dur-fast-calc) ease, background-color var(--motion-dur-fast-calc) ease; }
+.creation-home .creation-reference-card-remove { position: absolute; top: -10px; right: -10px; z-index: 3; display: grid; width: 24px; height: 24px; place-items: center; border: 1.5px solid rgba(255, 255, 255, .82); border-radius: var(--r-full); background: color-mix(in srgb, var(--color-neutral-950) 82%, transparent); color: var(--color-neutral-0); padding: 0; opacity: 0; transition: opacity var(--motion-dur-fast-calc) ease, background-color var(--motion-dur-fast-calc) ease; }
 .creation-home .creation-reference-stack-card:hover .creation-reference-card-remove,
 .creation-home .creation-reference-card-remove:focus-visible { opacity: 1; }
 .creation-home .creation-reference-card-remove:hover { background: var(--status-error); }
@@ -12394,7 +12394,7 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
 .creation-home .creation-reference-track.is-expanded .creation-reference-add-button { width: 52px; height: 69px; flex-basis: 52px; }
 .creation-home .creation-reference-add-button:hover:not(:disabled) { border-color: var(--creation-text); background: var(--creation-surface-hover); color: var(--creation-text); }
 .creation-home .creation-reference-add-button:disabled { cursor: wait; opacity: .5; }
-.creation-home .creation-reference-add-button svg { width: var(--space-5); height: var(--space-5); }
+.creation-home .creation-reference-add-button svg { width: var(--space-4); height: var(--space-4); }
 .creation-home .creation-reference-add-button span { font-size: 11px; line-height: 1; }
 .creation-reference-source-popover .ant-popover-inner { padding: 0; }
 .creation-reference-source-content { padding: 0; }
@@ -12582,15 +12582,15 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
     padding: 0;
 }
 .creation-home .creation-reference-add-button > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.creation-home .creation-reference-add-button:hover:not(:disabled) { transform: rotate(-3deg) translateY(-2px); }
+.creation-home .creation-reference-add-button:hover:not(:disabled) { transform: rotate(-6deg); }
 .creation-reference-source-popover { z-index: var(--z-toast) !important; }
 
 /* 有参考素材时，默认收成一叠；悬浮整组后在文字上方横向展开，不触发布局重排。 */
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card) {
     position: relative;
-    width: 84px;
-    min-width: 84px;
-    height: 96px;
+    width: 74px;
+    min-width: 74px;
+    height: 80px;
     overflow: visible;
     z-index: 4;
 }
@@ -12602,8 +12602,8 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
 .creation-home .creation-reference-track { min-height: 104px; overflow: visible !important; }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-track-wrapper,
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-stack-shell {
-    width: 84px;
-    height: 96px;
+    width: 74px;
+    height: 80px;
     overflow: visible;
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-track {
@@ -12612,13 +12612,16 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
     left: 0;
     width: max-content;
     max-width: none;
-    height: 96px;
+    height: 80px;
     overflow: visible;
     padding: 5px 4px;
     transition: filter var(--motion-state) var(--motion-ease-out);
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card {
-    margin-left: -54px;
+    width: 52px;
+    height: 69px;
+    flex-basis: 52px;
+    margin-left: -44px;
     pointer-events: none;
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:first-child {
@@ -12628,19 +12631,19 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(2) { z-index: 3; }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(3) { z-index: 2; }
-.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(n + 4) { z-index: 1; }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(n + 4) { display: none; }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-slot {
     position: absolute;
-    top: 51px;
-    left: 54px;
+    top: 52px;
+    left: 42px;
     z-index: 6;
     margin: 0;
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    flex-basis: 36px;
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    flex-basis: 25px;
     border-radius: var(--r-full);
     background: var(--creation-surface-raised, var(--creation-surface-muted));
     transform: none;
@@ -12655,16 +12658,114 @@ html:not(.dark) .creation-duration-choices button:hover { background: rgba(28, 3
     backdrop-filter: none;
 }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card {
+    display: block;
+    width: 52px;
+    height: 69px;
+    flex-basis: 52px;
     margin-left: 0;
     pointer-events: auto;
 }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card:hover,
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card:focus-within {
+    z-index: 100 !important;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card:hover .creation-reference-card-content,
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card:focus-within .creation-reference-card-content {
+    z-index: 100;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-card-remove {
+    z-index: 101;
+}
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-add-slot { margin-left: 2px; }
 .creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-add-button {
-    width: 66px;
-    height: 88px;
-    flex-basis: 66px;
+    width: 52px;
+    height: 69px;
+    flex-basis: 52px;
     border-radius: 9px;
 }
+
+/* 参考文件只在卡片之间切换叠放/展开状态；悬浮不改变卡片尺寸和纵向位置。 */
+.creation-home .creation-reference-panel .creation-reference-add-button,
+.creation-home .creation-reference-panel .creation-reference-add-button:hover:not(:disabled) {
+    translate: none;
+    box-shadow: none;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button,
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button:hover:not(:disabled) {
+    transform: none;
+}
+
+/* 收起时以右下角的加号为同一旋转轴展开扇形，保持每张卡片的角度和层级稳定。 */
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-card-content {
+    transform-origin: calc(100% + 5px) calc(100% - 7px);
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(1) .creation-reference-card-content { transform: translate(8px, 4px) rotate(7deg); }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(2) .creation-reference-card-content { transform: translate(0px, 0px) rotate(0deg); }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-stack-card:nth-child(3) .creation-reference-card-content { transform: translate(-8px, -4px) rotate(-7deg); }
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-slot {
+    top: 43px;
+    left: 42px;
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):not(:hover) .creation-reference-add-button {
+    border: 1px solid #57585B;
+    background: var(--creation-surface-raised, var(--creation-surface-muted));
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card) .creation-reference-add-button {
+    border: 1.5px solid rgba(255, 255, 255, .82);
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-track::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: var(--creation-surface);
+    content: "";
+}
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-stack-card,
+.creation-home .creation-reference-panel:has(.creation-reference-stack-card):hover .creation-reference-add-slot { z-index: 1; }
+
+/* 多文件上传合并成一个紧凑的叠放进度图标，避免逐文件列表挤占输入区。 */
+.creation-home .creation-upload-progress-card {
+    position: relative;
+    width: 66px;
+    height: 88px;
+    flex: 0 0 66px;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    padding: 0;
+}
+.creation-home .creation-upload-progress-stack {
+    position: absolute;
+    inset: 5px 4px 10px;
+}
+.creation-home .creation-upload-progress-stack i {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border: var(--stroke-1) solid var(--creation-border-strong);
+    border-radius: 9px;
+    background: var(--creation-surface-muted);
+    transform-origin: center bottom;
+}
+.creation-home .creation-upload-progress-stack i:nth-child(1) { transform: rotate(7deg) translate(5px, -1px); }
+.creation-home .creation-upload-progress-stack i:nth-child(2) { transform: rotate(2deg) translate(2px, 0); }
+.creation-home .creation-upload-progress-stack i:nth-child(3) { transform: rotate(-5deg); }
+.creation-home .creation-upload-progress-icon {
+    position: absolute;
+    right: -2px;
+    bottom: 4px;
+    z-index: 2;
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: var(--stroke-1) solid var(--creation-border-strong);
+    border-radius: var(--r-full);
+    background: var(--creation-surface-raised, var(--creation-surface-muted));
+    color: var(--creation-muted);
+}
+.creation-home .creation-upload-progress-icon svg { width: 18px; height: 18px; }
+.creation-home .creation-reference-track:has(.creation-upload-progress-card) .creation-reference-add-slot { display: none; }
 .creation-home .creation-chat-editor textarea,
 .creation-home .creation-chat-composer.is-thread .creation-chat-editor textarea,
     .creation-home .creation-chat-mention-container { min-height: 60px; }
@@ -12789,13 +12890,13 @@ html:not(.dark) .creation-user-message-reference { background: rgba(28, 32, 37, 
 .creation-media-preview-modal .ant-modal-close { color: #fff; }
 .creation-media-preview-video { display: block; width: 100%; max-height: 82vh; margin: 0 auto; object-fit: contain; }
 .creation-media-preview-video { width: 100%; background: #050505; }
-.creation-media-preview-modal.is-visual { top: 0; max-width: none; height: 100vh; margin: 0; padding: 0; }
-.creation-media-preview-modal.is-visual .ant-modal-container { display: grid; width: 100vw; height: 100vh; place-items: center; overflow: visible; border-radius: 0; background: transparent !important; box-shadow: none !important; }
+.creation-media-preview-modal.is-visual { top: 0; max-width: none; height: 100dvh; margin: 0; padding: 0; }
+.creation-media-preview-modal.is-visual .ant-modal-container { display: grid; width: 100vw; height: 100dvh; place-items: center; overflow: hidden; border-radius: 0; background: transparent !important; box-shadow: none !important; }
 .creation-media-preview-modal.is-visual .ant-modal-body { width: 100%; height: 100%; }
 .creation-media-preview-modal.is-visual .ant-modal-close { position: fixed; top: 20px; right: 20px; display: grid; width: 38px; height: 38px; place-items: center; border-radius: var(--r-full); background: color-mix(in srgb, var(--color-neutral-950) 72%, transparent); color: var(--color-neutral-0); }
-.creation-media-preview-stage { display: grid; width: 100vw; height: 100vh; place-items: center; padding: 56px; }
+.creation-media-preview-stage { display: grid; width: 100vw; height: 100dvh; place-items: center; overflow: hidden; padding: 56px; }
 .creation-media-preview-stage img,
-.creation-media-preview-stage video { display: block; max-width: 100%; max-height: 100%; border: 0; border-radius: 0; background: transparent; box-shadow: none; object-fit: contain; }
+.creation-media-preview-stage video { display: block; width: auto; height: auto; max-width: calc(100vw - 112px); max-height: calc(100dvh - 112px); border: 0; border-radius: 0; background: transparent; box-shadow: none; object-fit: contain; }
 .creation-media-preview-stage video { width: auto; height: auto; }
 
 html:not(.dark) .creation-user-message { background: rgba(28, 32, 37, .07); }
