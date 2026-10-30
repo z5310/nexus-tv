@@ -591,6 +591,8 @@ export default function CreatePage() {
         if (supported.length > remaining) toast.warning(`当前最多可添加 ${maxReferences} 个参考文件`);
         if (!accepted.length) return;
 
+        const completedBatchAttachments: Array<CreationAttachment | undefined> = new Array(accepted.length);
+        const batchAttachmentIds = new Set<string>();
         await Promise.all(accepted.map(async (file, index) => {
             const id = `upload:${Date.now()}:${index}:${file.name}`;
             setUploadItems((current) => [...current, { id, name: file.name, progress: 8, status: "uploading" }]);
@@ -602,8 +604,12 @@ export default function CreatePage() {
             try {
                 const { asset, attachment } = await uploadCreationAsset(file);
                 if (asset) addAsset(asset);
+                completedBatchAttachments[index] = attachment;
+                batchAttachmentIds.add(attachment.id);
                 setAttachments((current) => {
-                    const candidates = [...current, attachment];
+                    const existing = current.filter((item) => !batchAttachmentIds.has(item.id));
+                    const completedInSelectionOrder = completedBatchAttachments.filter((item): item is CreationAttachment => Boolean(item));
+                    const candidates = [...existing, ...completedInSelectionOrder];
                     const reconciled = mode === "video" && videoReferenceLimits
                         ? reconcileCreationAttachmentLimits(candidates, [], videoReferenceLimits)
                         : reconcileCreationAttachmentLimit(candidates, [], maxReferences);

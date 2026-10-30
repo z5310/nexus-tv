@@ -296,12 +296,12 @@ export function CreationComposer(props: ComposerProps) {
                                 aria-label="参考内容轨道"
                                 onScroll={updateTrackScrollState}
                             >
-                                {visibleAttachments.map((item) => <Reorder.Item<CreationAttachment>
+                                {visibleAttachments.map((item, index) => <Reorder.Item<CreationAttachment>
                                     key={item.id}
                                     value={item}
                                     layout="position"
                                     drag={trackState.isExpanded && canDragReferences && !interactionBusy}
-                                    className="creation-reference-stack-card"
+                                    className={`creation-reference-stack-card is-stack-layer-${Math.min(index + 1, 4)}`}
                                     onPointerDown={beginCardDrag}
                                     onPointerMove={moveCardDrag}
                                     onPointerUp={endCardDrag}
@@ -321,10 +321,12 @@ export function CreationComposer(props: ComposerProps) {
                                 >
                                     <CreationAttachmentThumbnail item={item} onPreview={previewAttachment} onRemove={props.onRemoveAttachment} />
                                 </Reorder.Item>)}
-                                {props.uploadItems.length ? <li className={`creation-upload-progress-card${props.uploadItems.some((item) => item.status === "error") ? " is-error" : ""}`} aria-label={props.uploadItems.some((item) => item.status === "error") ? "部分参考文件上传失败" : `正在上传 ${props.uploadItems.length} 个参考文件`}>
-                                    <span className="creation-upload-progress-stack" aria-hidden="true"><i /><i /><i /></span>
-                                    <span className="creation-upload-progress-icon">{props.uploadItems.some((item) => item.status === "error") ? <X /> : <LoaderCircle className="animate-spin" />}</span>
-                                </li> : null}
+                                {props.uploadItems.map((item, index) => {
+                                    const isActive = index === props.uploadItems.length - 1;
+                                    return <li key={item.id} className={`creation-upload-progress-card${isActive ? " is-active" : ""}${item.status === "error" ? " is-error" : ""}`} aria-label={item.status === "error" ? `${item.name} 上传失败` : `${item.name} 上传 ${item.progress}%`}>
+                                        <span className="creation-upload-progress-icon" aria-hidden="true">{item.status === "error" ? <X /> : isActive ? <LoaderCircle className="animate-spin" /> : <ImageIcon />}</span>
+                                    </li>;
+                                })}
                                 <li className="creation-reference-add-slot">{visibleAttachments.length ? <button type="button" className="creation-reference-add-button" onClick={() => uploadInputRef.current?.click()} disabled={interactionBusy || !canAddMoreReferences} aria-label={addReferenceLabel}><Plus aria-hidden="true" /><span>添加参考</span></button> : <Popover
                                     open={referenceSourceOpen}
                                     onOpenChange={setReferenceSourceOpen}
