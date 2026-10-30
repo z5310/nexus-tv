@@ -12326,6 +12326,7 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
     border: 1.5px solid rgba(255, 255, 255, .82);
     border-radius: var(--r-sm);
     background: var(--creation-surface-muted);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
     transform: rotate(var(--stack-rotate, 0deg));
     transform-origin: center bottom;
     transition: transform var(--motion-state) var(--motion-ease-out), box-shadow var(--motion-dur-fast-calc) ease;
@@ -12363,6 +12364,7 @@ html:not(.dark) .app-workspace-shell.is-creation-workspace .app-workspace-stage 
     border: var(--stroke-1) solid var(--creation-border);
     border-radius: var(--r-sm);
     background: var(--creation-surface-muted);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
     color: var(--creation-muted);
     list-style: none;
     padding: var(--space-1);
