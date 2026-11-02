@@ -3,10 +3,10 @@ import { AudioLines, Check, Film, Image, MessageSquareText } from "lucide-react"
 import { ModelIcon } from "@/components/model-picker";
 import { cn } from "@/lib/utils";
 import {
-    filterModelsByCapability,
     modelDisplayName,
     modelOptionName,
     resolveModelChannel,
+    selectableModelsByCapability,
     type AiConfig,
     type ModelCapability,
 } from "@/stores/use-config-store";
@@ -32,7 +32,7 @@ export function ModelDefaultGrid({ config, onChange }: { config: AiConfig; onCha
     return (
         <div className="space-y-1">
             {groups.map((group) => {
-                const models = filterModelsByCapability(config.models, group.capability, config.channels);
+                const models = selectableModelsByCapability(config, group.capability);
                 const Icon = group.icon;
                 return (
                     <section key={group.capability} className="py-5 first:pt-0 last:pb-0" aria-labelledby={`default-${group.capability}-title`}>
@@ -71,7 +71,9 @@ export function ModelDefaultGrid({ config, onChange }: { config: AiConfig; onCha
                                                     <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[var(--fs-tiny)] text-foreground/45">
                                                         <span className="max-w-full truncate">{channel.scope === "system" ? "系统模型" : channel.name || "未命名渠道"}</span>
                                                         <span className="model-default-option-scope">{channel.scope === "system" ? "系统" : "自定义"}</span>
-                                                        {creditsEnabled && cost ? <span className="model-default-price">{formatPrice(cost.billingMode === "token" ? (cost.outputTokenPriceMicrocredits || 0) : cost.unitPriceMicrocredits)} /{cost.billingMode === "token" ? "百万 Token" : cost.billingMode === "per_second" ? "秒" : "次"}</span> : null}
+                                                        {channel.interfaceType?.startsWith("runninghub-workflow")
+                                                            ? <span className="model-default-price">RunningHub 计费</span>
+                                                            : creditsEnabled && cost ? <span className="model-default-price">{formatPrice(cost.billingMode === "token" ? (cost.outputTokenPriceMicrocredits || 0) : cost.unitPriceMicrocredits)} /{cost.billingMode === "token" ? "百万 Token" : cost.billingMode === "per_second" ? "秒" : "次"}</span> : null}
                                                     </span>
                                                 </span>
                                                 <span className={cn("model-default-option-check grid size-5 shrink-0 place-items-center rounded-full", selected ? "is-selected" : "text-transparent")}>

@@ -37,6 +37,7 @@ import { quoteModel, type LogicalModelQuote } from "@/services/api/logical-model
 import { ConnectedReferenceShelf, ReferenceToolsPopover, referenceShelfHeading } from "./canvas-node-prompt-references";
 import { PromptModalResizeHandle, PromptResizeHandle, clampExpandedModalSize, clampPromptHeight, estimatePromptContentHeight, promptEditorBounds } from "./canvas-node-prompt-resize";
 import { audioConfigPatch, buildNodeConfig, defaultMode, modeDisplayName, promptPlaceholder, videoConfigPatch } from "./canvas-node-prompt-config";
+import { defaultRunningHubModelValue, runningHubWorkflowForModel, withRunningHubModels } from "@/lib/runninghub-model-adapter";
 
 export { buildNodeConfig } from "./canvas-node-prompt-config";
 
@@ -157,6 +158,8 @@ export function CanvasNodePromptPanel({ projectId, node, isRunning, onPromptChan
         }, mode),
     };
     const config = buildNodeConfig(globalConfig, node, mode, requirements);
+    const modelPickerConfig = withRunningHubModels(config, mode);
+    const modelPickerValue = config.taskWorkflowProvider === "runninghub" ? defaultRunningHubModelValue(config, mode) : config.model;
     const resolvedRequirements: ModelRequirements = {
         ...requirements,
         options: modelRequestOptions(config, mode),
@@ -449,9 +452,24 @@ export function CanvasNodePromptPanel({ projectId, node, isRunning, onPromptChan
                     <ModelPicker
                         className="canvas-node-composer-model-trigger !h-8 !w-full !min-w-0 !text-[var(--fs-tiny)] !font-normal [&_img]:!size-3 [&_.lucide]:!size-3"
                         fullWidth
-                        config={config}
-                        value={config.model}
-                        onChange={(model) => onConfigChange(node.id, mode === "image" ? { model, ...defaultImageParamsForModel(config, model) } : { model })}
+                        config={modelPickerConfig}
+                        value={modelPickerValue}
+                        onChange={(model) => {
+                            const workflow = runningHubWorkflowForModel(config, model);
+                            if (workflow) {
+                                onConfigChange(node.id, {
+                                    workflowProvider: "runninghub",
+                                    workflowTitle: workflow.title || "RunningHub 工作流",
+                                    runningHubWorkflowId: workflow.workflowId,
+                                    runningHubWorkflowKind: workflow.kind === "app" ? "app" : "workflow",
+                                    workflowParameters: {},
+                                });
+                                return;
+                            }
+                            onConfigChange(node.id, mode === "image"
+                                ? { workflowProvider: "model", runningHubWorkflowId: undefined, runningHubWorkflowKind: undefined, model, ...defaultImageParamsForModel(modelPickerConfig, model) }
+                                : { workflowProvider: "model", runningHubWorkflowId: undefined, runningHubWorkflowKind: undefined, model });
+                        }}
                         capability={mode}
                         requirements={resolvedRequirements}
                         onMissingConfig={() => navigateToSettings({ continueCreation: true })}

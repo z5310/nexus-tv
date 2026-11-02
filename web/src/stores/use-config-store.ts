@@ -124,6 +124,8 @@ export type AiConfig = {
     apiFormat: ApiCallFormat;
     channels: ModelChannel[];
     runningHub: RunningHubConfig;
+    /** 创作入口的全局默认生成来源；节点级生成仍由 taskWorkflowProvider 覆盖。 */
+    defaultWorkflowProvider?: "model" | "runninghub";
     /** 仅用于单次生成任务路由，不属于全局渠道启用状态。 */
     taskWorkflowProvider?: "model" | "runninghub";
     model: string;
@@ -181,6 +183,7 @@ export const defaultConfig: AiConfig = {
     // 创作端模型目录只能来自后台公开逻辑模型和用户自定义渠道，不能内置供应商模型。
     channels: [],
     runningHub: { enabled: false, baseUrl: "https://www.runninghub.cn", apiKey: "", walletApiKey: "", uploadApiKey: "", useWallet: false, capability: "image", selectedKind: "workflow", workflowId: "", workflows: [] },
+    defaultWorkflowProvider: "model",
     taskWorkflowProvider: "model",
     model: "",
     imageModel: "",

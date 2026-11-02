@@ -139,7 +139,6 @@ export function ModelPicker({
     }, [open]);
 
     const setPickerOpen = (nextOpen: boolean) => {
-        if (nextOpen && !options.length) onMissingConfig?.();
         if (nextOpen) window.dispatchEvent(new CustomEvent("model-picker-open", { detail: pickerId }));
         if (nextOpen) {
             setActiveGroupKey(optionGroups.find((group) => group.models.some((item) => item.models.includes(current)))?.key ?? null);
@@ -289,7 +288,8 @@ export function ModelPicker({
                 </div>
             ) : (
                 <div className="canvas-model-picker-empty" style={{ color: theme.node.muted }}>
-                    {emptyModelLabel(config, capability)}
+                    <span>{emptyModelLabel(config, capability)}</span>
+                    {onMissingConfig ? <button type="button" className="mt-3 rounded-md border px-3 py-1.5 text-xs font-medium" style={{ borderColor: theme.toolbar.border, color: theme.node.text }} onClick={() => { setOpen(false); onMissingConfig(); }}>前往配置模型</button> : null}
                 </div>
             )}
         </div>

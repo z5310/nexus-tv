@@ -18,6 +18,7 @@ import { RUNNINGHUB_PLUGIN_ID } from "@/lib/plugins/builtin/workflows";
 import { usePluginStore } from "@/stores/use-plugin-store";
 import { ProfilePane } from "./profile-pane";
 import { FeedbackInboxPane } from "./feedback-inbox-pane";
+import { defaultRunningHubModelValue, runningHubWorkflowForModel, withRunningHubModels } from "@/lib/runninghub-model-adapter";
 
 type ConfigSectionKey = "profile" | "channels" | "models" | "runninghub" | "preferences" | "prompts" | "agent-memory" | "storage" | "diagnostics" | "feedbacks";
 
@@ -52,6 +53,34 @@ export default function SettingsPage() {
     const config = useConfigStore((state) => state.config);
     const effectiveConfig = useEffectiveConfig();
     const updateConfig = useConfigStore((state) => state.updateConfig);
+    const modelSelectionConfig = useMemo(() => {
+        const catalog = withRunningHubModels(effectiveConfig);
+        const capability = effectiveConfig.defaultWorkflowProvider === "runninghub"
+            ? effectiveConfig.runningHub.capability
+            : !effectiveConfig.imageModel
+                ? "image"
+                : undefined;
+        if (!capability) return catalog;
+        const model = defaultRunningHubModelValue(effectiveConfig, capability);
+        if (!model) return catalog;
+        const key = capability === "video" ? "videoModel" : capability === "audio" ? "audioModel" : "imageModel";
+        return { ...catalog, [key]: model };
+    }, [effectiveConfig]);
+    const changeDefaultModel = (key: "imageModel" | "videoModel" | "textModel" | "audioModel", model: string) => {
+        const workflow = runningHubWorkflowForModel(effectiveConfig, model);
+        if (!workflow) {
+            updateConfig("defaultWorkflowProvider", "model");
+            updateConfig(key, model);
+            return;
+        }
+        updateConfig("defaultWorkflowProvider", "runninghub");
+        updateConfig("runningHub", {
+            ...effectiveConfig.runningHub,
+            capability: workflow.capability || "image",
+            selectedKind: workflow.kind === "app" ? "app" : "workflow",
+            workflowId: workflow.workflowId,
+        });
+    };
     const shouldPromptContinue = searchParams.get("continue") === "1";
     const userId = useUserStore((state) => state.user?.id);
     const userChannels = config.channels.filter((channel) => channel.scope !== "system");
@@ -117,7 +146,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
                 <div className="settings-section">
-                    <ModelDefaultGrid config={effectiveConfig} onChange={(key, model) => updateConfig(key, model)} />
+                    <ModelDefaultGrid config={modelSelectionConfig} onChange={changeDefaultModel} />
                 </div>
             </SettingsPane>
         ),

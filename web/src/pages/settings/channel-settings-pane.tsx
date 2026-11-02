@@ -8,14 +8,19 @@ import { ChannelHeadersEditor, validateChannelHeaders } from "@/components/chann
 import { WorkspaceState } from "@/components/layout/workspace-state";
 import { mergeFetchedChannelModelCosts } from "@/lib/channel-model-catalog";
 import { fetchChannelModels } from "@/services/api/image";
+import { fetchRunningHubApp, fetchRunningHubWorkflow } from "@/services/api/runninghub";
 import {
     createModelChannel,
     defaultBaseUrlForApiFormat,
     filterModelsByCapability,
     modelOptionsFromChannels,
+    mergeWorkflowFieldMappings,
+    normalizeRunningHubCapability,
+    normalizeRunningHubWorkflowKind,
     useConfigStore,
     type AiConfig,
     type ModelChannel,
+    type RunningHubWorkflow,
 } from "@/stores/use-config-store";
 import { ChannelModelSettings } from "./channel-video-pricing";
 import { Select } from "@/components/ui/base/select";
@@ -121,7 +126,8 @@ export function ChannelSettingsPane({ onOpenModels, onOpenRunningHub }: ChannelS
     const refreshAllModels = async () => {
         const runnable = userChannels.filter((channel) => !channelConnectionError(channel));
         const skipped = userChannels.filter((channel) => channelConnectionError(channel));
-        if (!runnable.length) {
+        const runningHubWorkflows = runningHubReady ? config.runningHub.workflows : [];
+        if (!runnable.length && !runningHubWorkflows.length) {
             const detail = skipped.map((channel) => `${channel.name || "未命名渠道"}：${channelConnectionError(channel)}`).join("；");
             message.error(detail || "没有可拉取的个人模型渠道，请先填写有效 Base URL 和 API Key");
             return;
@@ -138,6 +144,36 @@ export function ChannelSettingsPane({ onOpenModels, onOpenRunningHub }: ChannelS
                     }
                 }),
             );
+            const workflowResults = await Promise.all(runningHubWorkflows.map(async (workflow) => {
+                const kind = normalizeRunningHubWorkflowKind(workflow.kind);
+                const capability = normalizeRunningHubCapability(workflow.capability, config.runningHub.capability);
+                const request = {
+                    baseUrl: config.runningHub.baseUrl,
+                    apiKey: config.runningHub.apiKey,
+                    walletApiKey: "",
+                    useWallet: false,
+                    title: workflow.title || "",
+                    capability,
+                };
+                try {
+                    const result = kind === "app"
+                        ? await fetchRunningHubApp({ ...request, webappId: workflow.webappId || workflow.workflowId })
+                        : await fetchRunningHubWorkflow({ ...request, workflowId: workflow.workflowId });
+                    const next: RunningHubWorkflow = {
+                        ...workflow,
+                        ...result,
+                        kind,
+                        capability,
+                        workflowId: workflow.workflowId,
+                        webappId: kind === "app" ? result.webappId || workflow.webappId || workflow.workflowId : undefined,
+                        fields: mergeWorkflowFieldMappings(workflow.fields, result.fields, capability),
+                        workflowJson: kind === "workflow" ? result.workflowJson || workflow.workflowJson || {} : undefined,
+                    };
+                    return { workflow, next, error: "" };
+                } catch (error) {
+                    return { workflow, next: undefined, error: error instanceof Error ? error.message : "读取失败" };
+                }
+            }));
             const latestConfig = useConfigStore.getState().config;
             const successful = results.filter((item) => {
                 const latestChannel = latestConfig.channels.find((channel) => channel.id === item.channel.id);
@@ -148,21 +184,31 @@ export function ChannelSettingsPane({ onOpenModels, onOpenRunningHub }: ChannelS
                 return Boolean(item.result.models.length && (!latestChannel || channelConnectionSignature(latestChannel) !== channelConnectionSignature(item.channel)));
             });
             const failed = results.filter((item) => !item.result.models.length);
-            if (successful.length) {
+            const refreshedWorkflows = workflowResults.filter((item) => item.next).map((item) => item.next!);
+            if (successful.length || refreshedWorkflows.length) {
                 const resultMap = new Map(successful.map((item) => [item.channel.id, item.result] as const));
-                updateChannels(
-                    latestConfig.channels.map((channel) => {
+                const refreshedKeys = new Set(refreshedWorkflows.map((workflow) => `${normalizeRunningHubWorkflowKind(workflow.kind)}:${workflow.workflowId}`));
+                replaceConfig(withChannels({
+                    ...latestConfig,
+                    runningHub: {
+                        ...latestConfig.runningHub,
+                        workflows: [
+                            ...latestConfig.runningHub.workflows.filter((workflow) => !refreshedKeys.has(`${normalizeRunningHubWorkflowKind(workflow.kind)}:${workflow.workflowId}`)),
+                            ...refreshedWorkflows,
+                        ],
+                    },
+                }, latestConfig.channels.map((channel) => {
                         const fetched = resultMap.get(channel.id);
                         return fetched ? { ...channel, models: fetched.models, modelCosts: mergeFetchedChannelModelCosts(channel, fetched.catalog) } : channel;
-                    }),
-                    latestConfig,
-                );
-                message.success(`已更新 ${successful.length} 个渠道的模型`);
+                    })));
+                const summaries = [successful.length ? `${successful.length} 个普通渠道` : "", refreshedWorkflows.length ? `${refreshedWorkflows.length} 个 RunningHub 工作流` : ""].filter(Boolean);
+                message.success(`已更新 ${summaries.join("、")}`);
             }
             const warnings = [
                 ...failed.map((item) => `${item.channel.name || "未命名渠道"}：${item.error || "未返回模型"}`),
                 ...stale.map((item) => `${item.channel.name || "未命名渠道"}：连接配置已改变，已忽略旧结果`),
                 ...skipped.map((channel) => `${channel.name || "未命名渠道"}：${channelConnectionError(channel)}`),
+                ...workflowResults.filter((item) => !item.next).map((item) => `${item.workflow.title || item.workflow.workflowId}：${item.error}`),
             ];
             if (warnings.length) message.warning(`${warnings.join("；")}。未更新的渠道已保留原有模型列表`);
         } catch (error) {

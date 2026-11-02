@@ -41,6 +41,7 @@ import { CreationAgentEntry } from "./creation-agent-entry";
 import { createCreationSubmitGate } from "./creation-submit-gate";
 import { creationVideoConfig } from "./creation-generation-config";
 import { CreationLoginDialog } from "./creation-login-dialog";
+import { configForRunningHubModel, defaultRunningHubModelValue, runningHubWorkflowForModel, withRunningHubModels } from "@/lib/runninghub-model-adapter";
 
 const AssetLibraryPickerModal = lazy(() => import("@/components/assets/asset-library-picker-modal").then((module) => ({ default: module.AssetLibraryPickerModal })));
 const InspirationHall = lazy(() => import("@/pages/inspirations"));
@@ -147,7 +148,17 @@ export default function CreatePage() {
         () => conversations.filter((conversation) => conversation.id === activeId || conversation.messages.length > 0).sort((left, right) => conversationTimestamp(right.updatedAt) - conversationTimestamp(left.updatedAt)),
         [activeId, conversations],
     );
-    const preferredModel = mode === "text" ? config.textModel : mode === "image" ? config.imageModel : config.videoModel;
+    const pickerConfig = useMemo(() => withRunningHubModels(config, mode), [config, mode]);
+    const defaultWorkflowModel = useMemo(() => defaultRunningHubModelValue(config, mode), [config, mode]);
+    const workflowIsDefault = config.defaultWorkflowProvider === "runninghub";
+    const preferredModel = mode === "text"
+        ? config.textModel
+        : workflowIsDefault && defaultWorkflowModel
+            ? defaultWorkflowModel
+            : mode === "image"
+                ? config.imageModel || defaultWorkflowModel
+                : config.videoModel || defaultWorkflowModel;
+    const selectedWorkflow = runningHubWorkflowForModel(config, preferredModel);
     const hasPrompt = Boolean(prompt.trim());
     const modelRequirements = useMemo<ModelRequirements>(() => ({
         capability: mode,
@@ -161,22 +172,23 @@ export default function CreatePage() {
         videoSeconds: mode === "video" ? seconds : undefined,
         imageSize: mode === "image" ? ratio : undefined,
 		options: mode === "image"
-            ? imageParameterRequest(modelCapabilityConfigFor(config, preferredModel).image!, { ...config, size: ratio, imageResolution, quality, count, imageParameters }) ?? { size: ratio, imageResolution, quality, count: Number(count), transparentBackground: config.transparentBackground === "true" }
+            ? imageParameterRequest(modelCapabilityConfigFor(pickerConfig, preferredModel).image!, { ...pickerConfig, size: ratio, imageResolution, quality, count, imageParameters }) ?? { size: ratio, imageResolution, quality, count: Number(count), transparentBackground: config.transparentBackground === "true" }
 			: mode === "video"
 				? { size: ratio, videoSeconds: Number(seconds), vquality: videoQuality }
 				: {},
-    }), [attachments, config, preferredModel, count, hasPrompt, imageResolution, imageParameters, mode, quality, ratio, seconds, videoQuality]);
-    const selectedModel = resolveCompatibleModel(config, preferredModel, modelRequirements) || preferredModel;
-    const generationConfig = useMemo(() => mode === "video"
-        ? creationVideoConfig(config, selectedModel, { ratio, seconds, videoQuality })
-        : config, [config, mode, ratio, seconds, selectedModel, videoQuality]);
-    const imageProfile = useMemo(() => modelCapabilityConfigFor(config, selectedModel).image!, [config, selectedModel]);
-    const videoProfile = useMemo(() => modelCapabilityConfigFor(config, selectedModel).video!, [config, selectedModel]);
+    }), [attachments, config.transparentBackground, pickerConfig, preferredModel, count, hasPrompt, imageResolution, imageParameters, mode, quality, ratio, seconds, videoQuality]);
+    const selectedModel = resolveCompatibleModel(pickerConfig, preferredModel, modelRequirements) || preferredModel;
+    const generationConfig = useMemo(() => {
+        const targetConfig = selectedWorkflow ? configForRunningHubModel(config, selectedWorkflow) : pickerConfig;
+        return mode === "video" ? creationVideoConfig(targetConfig, selectedModel, { ratio, seconds, videoQuality }) : targetConfig;
+    }, [config, mode, pickerConfig, ratio, seconds, selectedModel, selectedWorkflow, videoQuality]);
+    const imageProfile = useMemo(() => modelCapabilityConfigFor(pickerConfig, selectedModel).image!, [pickerConfig, selectedModel]);
+    const videoProfile = useMemo(() => modelCapabilityConfigFor(pickerConfig, selectedModel).video!, [pickerConfig, selectedModel]);
     // 同名逻辑模型可能把文生视频、图生视频和全模态参考拆到不同路由。
     // 入口需要展示整个模型组的引用能力，添加素材后再由兼容路由选择具体模型。
     const videoReferenceLimits = useMemo(() => mode === "video"
-        ? modelGroupReferenceLimits(config, preferredModel || selectedModel, "video") || { maxImages: 0, maxVideos: 0, maxAudios: 0 }
-        : undefined, [config, mode, preferredModel, selectedModel]);
+        ? modelGroupReferenceLimits(pickerConfig, preferredModel || selectedModel, "video") || { maxImages: 0, maxVideos: 0, maxAudios: 0 }
+        : undefined, [mode, pickerConfig, preferredModel, selectedModel]);
     const maxReferences = mode === "video"
         ? (videoReferenceLimits?.maxImages || 0) + (videoReferenceLimits?.maxVideos || 0) + (videoReferenceLimits?.maxAudios || 0)
         : mode === "image" ? imageProfile.references.maxImages : 6;
@@ -862,7 +874,7 @@ export default function CreatePage() {
         const normalizedImage = mode === "image"
             ? imageProfile.parameters
                 ? { size: ratio, quality, imageResolution, imageParameters, count }
-                : normalizeImageValue(imageProfile, { size: ratio, quality, imageResolution, imageParameters, count }, resolveModelRequestConfig(config, selectedModel).interfaceType)
+                : normalizeImageValue(imageProfile, { size: ratio, quality, imageResolution, imageParameters, count }, resolveModelRequestConfig(generationConfig, selectedModel).interfaceType)
             : undefined;
         const requestConfig = {
             ...generationConfig,
@@ -1244,8 +1256,22 @@ export default function CreatePage() {
         modelRequirements,
         imageProfile,
         videoProfile,
-        config: generationConfig,
-        onModelChange: (value: string) => updateConfig(mode === "text" ? "textModel" : mode === "image" ? "imageModel" : "videoModel", value),
+        config: pickerConfig,
+        onModelChange: (value: string) => {
+            const workflow = runningHubWorkflowForModel(config, value);
+            if (workflow) {
+                updateConfig("defaultWorkflowProvider", "runninghub");
+                updateConfig("runningHub", {
+                    ...config.runningHub,
+                    capability: workflow.capability || "image",
+                    selectedKind: workflow.kind === "app" ? "app" : "workflow",
+                    workflowId: workflow.workflowId,
+                });
+                return;
+            }
+            updateConfig("defaultWorkflowProvider", "model");
+            updateConfig(mode === "text" ? "textModel" : mode === "image" ? "imageModel" : "videoModel", value);
+        },
         ratio,
         setRatio: setComposerRatio,
         seconds,
