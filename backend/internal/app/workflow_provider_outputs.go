@@ -188,7 +188,7 @@ func (s *Service) downloadWorkflowOutputsWithPolicy(ctx context.Context, urls []
 		if err != nil {
 			return nil, fmt.Errorf("下载 RunningHub 产物失败：%w", err)
 		}
-		mimeType = runningHubOutputMimeType(rawURL, mimeType)
+		mimeType = runningHubOutputMimeType(rawURL, mimeType, data)
 		item := workflowOutputValue(mimeType, data)
 		if item == nil {
 			continue
@@ -221,9 +221,9 @@ func (s *Service) downloadWorkflowOutputsWithPolicy(ctx context.Context, urls []
 	return result, nil
 }
 
-func runningHubOutputMimeType(rawURL string, declared string) string {
+func runningHubOutputMimeType(rawURL string, declared string, data []byte) string {
 	declared = strings.TrimSpace(strings.Split(declared, ";")[0])
-	if declared != "" && declared != "application/octet-stream" {
+	if isWorkflowMediaMimeType(declared) {
 		return declared
 	}
 	pathValue := rawURL
@@ -240,7 +240,17 @@ func runningHubOutputMimeType(rawURL string, declared string) string {
 			return mimeType
 		}
 	}
+	// RunningHub 的下载地址经常没有文件扩展名，部分 CDN 也只返回
+	// application/octet-stream。此时以文件签名字节识别真实媒体类型。
+	detected := strings.TrimSpace(strings.Split(http.DetectContentType(data), ";")[0])
+	if isWorkflowMediaMimeType(detected) {
+		return detected
+	}
 	return declared
+}
+
+func isWorkflowMediaMimeType(value string) bool {
+	return strings.HasPrefix(value, "image/") || strings.HasPrefix(value, "video/") || strings.HasPrefix(value, "audio/")
 }
 
 func workflowOutputValue(mimeType string, data []byte) interface{} {
